@@ -24,11 +24,19 @@ export default function ImageUploader({
   const handleFiles = (files: File[]) => {
     const imageFiles = files.filter((file) => file.type.startsWith("image/"));
 
+    const newImages: string[] = [];
+    let processedCount = 0;
+
     imageFiles.forEach((file) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
-        onImagesChange([...images, result]);
+        newImages.push(result);
+        processedCount++;
+        
+        if (processedCount === imageFiles.length) {
+          onImagesChange([...images, ...newImages]);
+        }
       };
       reader.readAsDataURL(file);
     });

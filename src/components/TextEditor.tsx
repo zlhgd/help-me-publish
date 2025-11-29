@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent } from "react";
+import { ChangeEvent, useState } from "react";
 
 interface TextEditorProps {
   text: string;
@@ -8,12 +8,32 @@ interface TextEditorProps {
 }
 
 export default function TextEditor({ text, onTextChange }: TextEditorProps) {
+  const [copyStatus, setCopyStatus] = useState<"idle" | "success" | "error">("idle");
+
   const handleChange = (e: ChangeEvent<HTMLTextAreaElement>) => {
     onTextChange(e.target.value);
   };
 
-  const copyToClipboard = () => {
-    navigator.clipboard.writeText(text);
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyStatus("success");
+      setTimeout(() => setCopyStatus("idle"), 2000);
+    } catch {
+      setCopyStatus("error");
+      setTimeout(() => setCopyStatus("idle"), 2000);
+    }
+  };
+
+  const getCopyButtonText = () => {
+    switch (copyStatus) {
+      case "success":
+        return "✅ Copié!";
+      case "error":
+        return "❌ Erreur";
+      default:
+        return "📋 Copier";
+    }
   };
 
   return (
@@ -25,7 +45,7 @@ export default function TextEditor({ text, onTextChange }: TextEditorProps) {
           disabled={!text}
           className="text-sm px-3 py-1 bg-gray-100 hover:bg-gray-200 rounded-md text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          📋 Copier
+          {getCopyButtonText()}
         </button>
       </div>
       <textarea

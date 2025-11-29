@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 interface InstagramPreviewProps {
   images: string[];
@@ -13,15 +13,21 @@ export default function InstagramPreview({
 }: InstagramPreviewProps) {
   const [currentImage, setCurrentImage] = useState(0);
 
+  // Ensure currentImage is within bounds using useMemo
+  const safeCurrentImage = useMemo(() => {
+    if (images.length === 0) return 0;
+    return Math.min(currentImage, images.length - 1);
+  }, [currentImage, images.length]);
+
   const nextImage = () => {
-    if (currentImage < images.length - 1) {
-      setCurrentImage(currentImage + 1);
+    if (safeCurrentImage < images.length - 1) {
+      setCurrentImage(safeCurrentImage + 1);
     }
   };
 
   const prevImage = () => {
-    if (currentImage > 0) {
-      setCurrentImage(currentImage - 1);
+    if (safeCurrentImage > 0) {
+      setCurrentImage(safeCurrentImage - 1);
     }
   };
 
@@ -44,13 +50,13 @@ export default function InstagramPreview({
       {images.length > 0 ? (
         <div className="relative aspect-square bg-black">
           <img
-            src={images[currentImage]}
-            alt={`Preview ${currentImage + 1}`}
+            src={images[safeCurrentImage]}
+            alt={`Preview ${safeCurrentImage + 1}`}
             className="w-full h-full object-contain"
           />
           {images.length > 1 && (
             <>
-              {currentImage > 0 && (
+              {safeCurrentImage > 0 && (
                 <button
                   onClick={prevImage}
                   className="absolute left-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white bg-opacity-80 rounded-full flex items-center justify-center text-gray-800"
@@ -58,7 +64,7 @@ export default function InstagramPreview({
                   ‹
                 </button>
               )}
-              {currentImage < images.length - 1 && (
+              {safeCurrentImage < images.length - 1 && (
                 <button
                   onClick={nextImage}
                   className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-white bg-opacity-80 rounded-full flex items-center justify-center text-gray-800"
@@ -71,7 +77,7 @@ export default function InstagramPreview({
                   <div
                     key={index}
                     className={`w-1.5 h-1.5 rounded-full ${
-                      index === currentImage ? "bg-blue-500" : "bg-white/60"
+                      index === safeCurrentImage ? "bg-blue-500" : "bg-white/60"
                     }`}
                   />
                 ))}
